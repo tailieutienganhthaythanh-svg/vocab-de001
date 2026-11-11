@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bộ Flashcard Từ Vựng Tiếng Anh - 40 Cụm Từ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #f1f5f9;
+    padding: 16px;
+  }
+  .container {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+  }
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .title-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4338ca;
+    background: #e0e7ff;
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  .progress {
+    font-weight: 700;
+    color: #475569;
+    font-size: 15px;
+  }
+  
+  /* Khung thẻ tối ưu hoàn hảo cho Mobile (chuyển đổi display, không dùng backface 3D dễ lỗi) */
+  .card-box {
+    min-height: 290px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .card-face {
+    width: 100%;
+    min-height: 290px;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 18px;
+    border: 2px solid #e2e8f0;
+    background: #ffffff;
+    user-select: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card-face:active {
+    transform: scale(0.985);
+  }
+  .card-back {
+    display: none;
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+  
+  /* Mặt trước */
+  .word {
+    font-size: 23px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .ipa {
+    font-size: 15px;
+    color: #6366f1;
+    font-family: Consolas, Monaco, monospace;
+    margin-bottom: 12px;
+  }
+  .front-meaning {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1e293b;
+    background: #f1f5f9;
+    padding: 8px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    width: 100%;
+    line-height: 1.4;
+  }
+  .audio-btn {
+    background: #4f46e5;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    touch-action: manipulation;
+  }
+  
+  /* Mặt sau */
+  .pos {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0284c7;
+    background: #e0f2fe;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .back-word {
+    font-size: 19px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+  .meaning {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+  .example-box {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 100%;
+    text-align: left;
+  }
+  .example-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .example {
+    font-size: 13.5px;
+    color: #334155;
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  /* Nút thao tác cảm ứng lớn hơn */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .btn {
+    padding: 14px 10px;
+    border: none;
+    border-radius: 12px;
+    background: #1e293b;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn:active {
+    background: #334155;
+    transform: scale(0.97);
+  }
+  .btn-flip {
+    background: #4338ca;
+  }
+  .btn-accent {
+    background: #059669;
+  }
+  .hint-text {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-bar">
+    <span class="title-tag">Vocabulary Review</span>
+    <span class="progress" id="progress">1 / 40</span>
+  </div>
+
+  <div class="card-box" id="cardBox">
+    <!-- Mặt trước -->
+    <div class="card-face card-front" id="cardFront">
+      <div class="word" id="frontWord">Lend a (helping) hand</div>
+      <div class="ipa" id="frontIpa">/lend ə ˈhelpɪŋ hænd/</div>
+      <div class="front-meaning" id="frontMeaning">Chung tay giúp đỡ, hỗ trợ ai đó</div>
+      <button class="audio-btn" id="audioBtn">
+        🔊 Nghe phát âm
+      </button>
+    </div>
+
+    <!-- Mặt sau -->
+    <div class="card-face card-back" id="cardBack">
+      <span class="pos" id="backPos">idiom</span>
+      <div class="back-word" id="backWord">Lend a (helping) hand</div>
+      <div class="meaning" id="backMeaning">Chung tay giúp đỡ, hỗ trợ ai đó</div>
+      <div class="example-box">
+        <span class="example-label">Ví dụ ngữ cảnh:</span>
+        <div class="example" id="backExample">"Volunteers are always ready to lend a helping hand to those in need."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnPrev">← Trước</button>
+    <button class="btn btn-flip" id="btnFlip">🔄 Lật thẻ</button>
+    <button class="btn" id="btnNext">Tiếp →</button>
+    <button class="btn btn-accent" id="btnShuffle">🔀 Trộn từ</button>
+  </div>
+
+  <div class="hint-text">
+    Chạm vào thẻ hoặc nút <b>Lật thẻ</b> để xem chi tiết câu ví dụ
+  </div>
+</div>
+
+<script>
+  const vocabList = [
+    {
+      word: "Lend a (helping) hand",
+      ipa: "/lend ə ˈhelpɪŋ hænd/",
+      pos: "idiom",
+      meaning: "Chung tay giúp đỡ, hỗ trợ ai đó",
+      example: "Volunteers are always ready to lend a helping hand to those in need."
+    },
+    {
+      word: "Resilience",
+      ipa: "/rɪˈzɪliəns/",
+      pos: "noun",
+      meaning: "Tính kiên cường, khả năng phục hồi sau khó khăn",
+      example: "She showed great resilience in overcoming personal challenges."
+    },
+    {
+      word: "Foster a supportive network",
+      ipa: "/ˈfɒstər ə səˈpɔːtɪv ˈnetwɜːk/",
+      pos: "collocation",
+      meaning: "Nuôi dưỡng / phát triển một mạng lưới hỗ trợ",
+      example: "Schools should foster a supportive network among students and teachers."
+    },
+    {
+      word: "Provide companionship to",
+      ipa: "/prəˈvaɪd kəmˈpænjənʃɪp tuː/",
+      pos: "collocation",
+      meaning: "Bầu bạn, ở bên đồng hành cùng ai (đặc biệt là người già)",
+      example: "Pets can provide companionship to elderly people living alone."
+    },
+    {
+      word: "Make an impact",
+      ipa: "/meɪk ən ˈɪmpækt/",
+      pos: "collocation",
+      meaning: "Tạo ra tác động, tạo sức ảnh hưởng tích cực",
+      example: "Young leaders are making an impact on their local communities."
+    },
+    {
+      word: "Irrespective of",
+      ipa: "/ˌɪrɪˈspektɪv əv/",
+      pos: "preposition",
+      meaning: "Bất kể, không phân biệt (thể chất hay nhận thức)",
+      example: "Education should be accessible to all, irrespective of background."
+    },
+    {
+      word: "Cognitive limitations",
+      ipa: "/ˈkɒɡnətɪv ˌlɪmɪˈteɪʃənz/",
+      pos: "noun phrase",
+      meaning: "Những khiếm khuyết / hạn chế về năng lực nhận thức",
+      example: "Specialized tools help students with cognitive limitations learn better."
+    },
+    {
+      word: "Personalised learning plan",
+      ipa: "/ˈpɜːsənəlaɪzd ˈlɜːnɪŋ plæn/",
+      pos: "noun phrase",
+      meaning: "Kế hoạch học tập được cá nhân hóa theo từng người học",
+      example: "Each student progresses faster with a personalised learning plan."
+    },
+    {
+      word: "At one's own pace",
+      ipa: "/æt wʌnz əʊn peɪs/",
+      pos: "phrase",
+      meaning: "Theo tốc độ / tiến độ riêng của bản thân",
+      example: "Online courses allow learners to study at their own pace."
+    },
+    {
+      word: "Intuitive interface",
+      ipa: "/ɪnˈtjuːɪtɪv ˈɪntəfeɪs/",
+      pos: "noun phrase",
+      meaning: "Giao diện trực quan, thân thiện và dễ thao tác",
+      example: "The app features an intuitive interface that is easy to navigate."
+    },
+    {
+      word: "Keep up with",
+      ipa: "/kiːp ʌp wɪð/",
+      pos: "phrasal verb",
+      meaning: "Bắt kịp, theo kịp tiến độ chương trình",
+      example: "He worked hard to keep up with his classmates in advanced math."
+    },
+    {
+      word: "Critical thinking",
+      ipa: "/ˌkrɪtɪkəl ˈθɪŋkɪŋ/",
+      pos: "noun phrase",
+      meaning: "Tư duy phản biện, kỹ năng suy luận phân tích",
+      example: "Developing critical thinking is essential in modern education."
+    },
+    {
+      word: "Reach one's fullest potential",
+      ipa: "/riːtʃ wʌnz ˈfʊlɪst pəˈtenʃəl/",
+      pos: "phrase",
+      meaning: "Phát huy / khai phá tối đa tiềm năng bản thân",
+      example: "Good mentorship helps students reach their fullest potential."
+    },
+    {
+      word: "Environmental advocacy",
+      ipa: "/ɪnˌvaɪrənˈmentəl ˈædvəkəsi/",
+      pos: "noun phrase",
+      meaning: "Hoạt động vận động / bảo vệ môi trường",
+      example: "Her environmental advocacy led to stricter local recycling laws."
+    },
+    {
+      word: "Pursue a career in",
+      ipa: "/pəˈsjuː ə kəˈrɪər ɪn/",
+      pos: "collocation",
+      meaning: "Theo đuổi sự nghiệp trong một lĩnh vực cụ thể",
+      example: "She decided to pursue a career in software engineering."
+    },
+    {
+      word: "Align with one's values",
+      ipa: "/əˈlaɪn wɪð wʌnz ˈvæljuːz/",
+      pos: "phrase",
+      meaning: "Phù hợp, đồng điệu với các giá trị / chuẩn mực cá nhân",
+      example: "Choose a career path that aligns with your personal values."
+    },
+    {
+      word: "Adopt sustainable practices",
+      ipa: "/əˈdɒpt səˈsteɪnəbəl ˈpræktɪsɪz/",
+      pos: "collocation",
+      meaning: "Áp dụng / thực hiện các phương thức phát triển bền vững",
+      example: "Businesses are encouraged to adopt sustainable practices to reduce waste."
+    },
+    {
+      word: "Undergo major changes",
+      ipa: "/ˌʌndəˈɡəʊ ˈmeɪdʒər ˈtʃeɪndʒɪz/",
+      pos: "collocation",
+      meaning: "Trải qua những biến chuyển / đổi thay lớn",
+      example: "The education system has undergone major changes in recent years."
+    },
+    {
+      word: "Urban expansion",
+      ipa: "/ˈɜːbən ɪkˈspænʃən/",
+      pos: "noun phrase",
+      meaning: "Sự mở rộng / bành trướng không gian đô thị",
+      example: "Rapid urban expansion puts immense pressure on natural habitats."
+    },
+    {
+      word: "Infrastructure strain",
+      ipa: "/ˈɪnfrəˌstrʌktʃər streɪn/",
+      pos: "noun phrase",
+      meaning: "Áp lực quá tải lên hệ thống cơ sở hạ tầng",
+      example: "Overpopulation has caused severe infrastructure strain in metropolitan areas."
+    },
+    {
+      word: "Groundbreaking project",
+      ipa: "/ˈɡraʊndˌbreɪkɪŋ ˈprɒdʒekt/",
+      pos: "noun phrase",
+      meaning: "Dự án mang tính đột phá, tiên phong",
+      example: "Scientists launched a groundbreaking project to restore coral reefs."
+    },
+    {
+      word: "Combat global warming",
+      ipa: "/ˈkɒmbæt ˈɡləʊbəl ˈwɔːmɪŋ/",
+      pos: "collocation",
+      meaning: "Chống lại / ngăn chặn hiện tượng nóng lên toàn cầu",
+      example: "Nations must unite to combat global warming effectively."
+    },
+    {
+      word: "Carbon-capturing device",
+      ipa: "/ˈkɑːbən ˈkæptʃərɪŋ dɪˈvaɪs/",
+      pos: "noun phrase",
+      meaning: "Thiết bị thu giữ / cô lập khí thải carbon",
+      example: "The factory installed a carbon-capturing device to curb industrial emissions."
+    },
+    {
+      word: "Combined expertise",
+      ipa: "/kəmˈbaɪnd ˌekspɜːˈtiːz/",
+      pos: "noun phrase",
+      meaning: "Chuyên môn liên ngành / tổng hợp chuyên sâu",
+      example: "The research team relied on combined expertise from medicine and AI."
+    },
+    {
+      word: "Drive the mission",
+      ipa: "/draɪv ðə ˈmɪʃən/",
+      pos: "collocation",
+      meaning: "Thúc đẩy, chèo lái và định hướng sứ mệnh",
+      example: "Dedicated educators drive the mission of educational equity."
+    },
+    {
+      word: "Withstand climates",
+      ipa: "/wɪðˈstænd ˈklaɪməts/",
+      pos: "collocation",
+      meaning: "Chống chịu, đứng vững trước các điều kiện khí hậu khắc nghiệt",
+      example: "These genetically modified crops can withstand harsh climates."
+    },
+    {
+      word: "Advanced data analytics",
+      ipa: "/ədˈvɑːnst ˈdeɪtə ˌænəˈlɪtɪks/",
+      pos: "noun phrase",
+      meaning: "Phân tích dữ liệu nâng cao",
+      example: "Companies use advanced data analytics to forecast market trends."
+    },
+    {
+      word: "Optimise resources",
+      ipa: "/ˈɒptɪmaɪz rɪˈzɔːsɪz/",
+      pos: "collocation",
+      meaning: "Tối ưu hóa các nguồn lực / tài nguyên sử dụng",
+      example: "Schools optimize resources by sharing digital learning libraries."
+    },
+    {
+      word: "Play a vital role in",
+      ipa: "/pleɪ ə ˈvaɪtəl rəʊl ɪn/",
+      pos: "collocation",
+      meaning: "Đóng vai trò thiết yếu, sống còn trong việc gì",
+      example: "Teachers play a vital role in shaping students' character."
+    },
+    {
+      word: "Thriving",
+      ipa: "/ˈθraɪvɪŋ/",
+      pos: "adjective",
+      meaning: "Phát triển cực kỳ hưng thịnh, mạnh mẽ",
+      example: "The tech startup grew into a thriving multinational company."
+    },
+    {
+      word: "Work-life balance",
+      ipa: "/ˌwɜːk laɪf ˈbæləns/",
+      pos: "noun phrase",
+      meaning: "Sự cân bằng hài hòa giữa công việc và đời sống cá nhân",
+      example: "Maintaining a healthy work-life balance reduces work-related stress."
+    },
+    {
+      word: "Mark a turning point",
+      ipa: "/mɑːk ə ˈtɜːnɪŋ pɔɪnt/",
+      pos: "collocation",
+      meaning: "Đánh dấu một bước ngoặt quan trọng mang tính lịch sử",
+      example: "The invention of the internet marked a turning point in human communication."
+    },
+    {
+      word: "Dissemination of news",
+      ipa: "/dɪˌsemɪˈneɪʃən əv njuːz/",
+      pos: "noun phrase",
+      meaning: "Sự phổ biến / truyền bá / phát tán tin tức rộng rãi",
+      example: "Social networks speed up the dissemination of news worldwide."
+    },
+    {
+      word: "Formation of public opinion",
+      ipa: "/fɔːˈmeɪʃən əv ˈpʌblɪk əˈpɪnjən/",
+      pos: "noun phrase",
+      meaning: "Sự hình thành dư luận / định hình quan điểm của công chúng",
+      example: "Media channels play a critical role in the formation of public opinion."
+    },
+    {
+      word: "Profoundly modify",
+      ipa: "/prəˈfaʊndli ˈmɒdɪfaɪ/",
+      pos: "collocation",
+      meaning: "Làm thay đổi một cách sâu sắc / căn bản",
+      example: "Artificial intelligence will profoundly modify how we work and teach."
+    },
+    {
+      word: "Lay the foundation for",
+      ipa: "/leɪ ðə faʊnˈdeɪʃən fɔːr/",
+      pos: "collocation",
+      meaning: "Đặt nền móng / xây dựng nền tảng vững chắc cho cái gì",
+      example: "Early childhood experiences lay the foundation for future learning."
+    },
+    {
+      word: "Media landscape",
+      ipa: "/ˈmiːdiə ˈlændskeɪp/",
+      pos: "noun phrase",
+      meaning: "Toàn cảnh / diện mạo thế giới truyền thông",
+      example: "Digital platforms have completely revolutionized the global media landscape."
+    },
+    {
+      word: "Public perception",
+      ipa: "/ˈpʌblɪk pəˈsepʃən/",
+      pos: "noun phrase",
+      meaning: "Nhận thức / cách nhìn nhận của xã hội và công chúng",
+      example: "The campaign successfully shifted public perception toward clean energy."
+    },
+    {
+      word: "The course of history",
+      ipa: "/ðə kɔːs əv ˈhɪstəri/",
+      pos: "phrase",
+      meaning: "Tiến trình lịch sử, dòng chảy thời gian của nhân loại",
+      example: "Scientific breakthroughs have repeatedly altered the course of history."
+    },
+    {
+      word: "Sow the seeds of",
+      ipa: "/səʊ ðə siːdz əv/",
+      pos: "idiom",
+      meaning: "Gieo mầm, đặt khởi nguồn sơ khai cho một điều gì đó",
+      example: "His pioneering research sowed the seeds of modern biotechnology."
+    }
+  ];
+
+  let currentIndex = 0;
+  let isFlipped = false;
+
+  const cardFront = document.getElementById("cardFront");
+  const cardBack = document.getElementById("cardBack");
+
+  function renderCard() {
+    isFlipped = false;
+    cardFront.style.display = "flex";
+    cardBack.style.display = "none";
+
+    const item = vocabList[currentIndex];
+    document.getElementById("frontWord").innerText = item.word;
+    document.getElementById("frontIpa").innerText = item.ipa;
+    document.getElementById("frontMeaning").innerText = item.meaning;
+
+    document.getElementById("backPos").innerText = item.pos;
+    document.getElementById("backWord").innerText = item.word;
+    document.getElementById("backMeaning").innerText = item.meaning;
+    document.getElementById("backExample").innerText = `"${item.example}"`;
+
+    document.getElementById("progress").innerText = `${currentIndex + 1} / ${vocabList.length}`;
+  }
+
+  function toggleFlip() {
+    isFlipped = !isFlipped;
+    if (isFlipped) {
+      cardFront.style.display = "none";
+      cardBack.style.display = "flex";
+    } else {
+      cardFront.style.display = "flex";
+      cardBack.style.display = "none";
+    }
+  }
+
+  function nextCard() {
+    if (currentIndex < vocabList.length - 1) {
+      currentIndex++;
+      renderCard();
+    }
+  }
+
+  function prevCard() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderCard();
+    }
+  }
+
+  function shuffleCards() {
+    vocabList.sort(() => Math.random() - 0.5);
+    currentIndex = 0;
+    renderCard();
+  }
+
+  function speakWord() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const word = vocabList[currentIndex].word;
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  // Gắn sự kiện cảm ứng trực tiếp (tránh xung đột touch/click trên Mobile)
+  document.getElementById("cardBox").addEventListener("click", function(e) {
+    if (e.target.closest("#audioBtn")) return;
+    toggleFlip();
+  });
+
+  document.getElementById("btnFlip").addEventListener("click", toggleFlip);
+  document.getElementById("btnNext").addEventListener("click", nextCard);
+  document.getElementById("btnPrev").addEventListener("click", prevCard);
+  document.getElementById("btnShuffle").addEventListener("click", shuffleCards);
+  document.getElementById("audioBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    speakWord();
+  });
+
+  // Hỗ trợ vuốt tay (Swipe) trái/phải trên màn hình điện thoại
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.getElementById("cardBox").addEventListener("touchstart", function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, {passive: true});
+
+  document.getElementById("cardBox").addEventListener("touchend", function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, {passive: true});
+
+  function handleSwipe() {
+    const diff = touchEndX - touchStartX;
+    if (diff < -50) {
+      nextCard(); // Vuốt sang trái -> từ kế tiếp
+    } else if (diff > 50) {
+      prevCard(); // Vuốt sang phải -> từ trước đó
+    }
+  }
+
+  renderCard();
+</script>
+
+</body>
+</html>
